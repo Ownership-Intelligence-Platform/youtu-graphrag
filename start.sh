@@ -3,6 +3,7 @@
 echo "🌟 Starting Youtu-GraphRAG Server..."
 echo "=========================================="
 
+git pull
 
 # Check if required files exist
 if [ ! -f "backend.py" ]; then
@@ -20,10 +21,15 @@ echo "🔄 Checking for existing processes..."
 pkill -f backend.py 2>/dev/null || true
 
 # Start the backend server
-echo "🚀 Starting backend server..."
-echo "🛑 Press Ctrl+C to stop the server"
+echo "🚀 Starting backend server in background..."
 echo "=========================================="
 
-python backend.py
+nohup python backend.py > backend.log 2>&1 &
+BACKEND_PID=$!
 
-echo "👋 Youtu-GraphRAG server stopped."
+echo "✅ Backend server started (PID: $BACKEND_PID)"
+echo "� Logs are being written to backend.log"
+echo "🌐 Server should be available at http://localhost:8003"
+echo ""
+echo "To stop the server, run: kill $BACKEND_PID"
+echo "Or to stop all backend processes: pkill -f backend.py"
