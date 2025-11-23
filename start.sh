@@ -24,11 +24,11 @@ pkill -f backend.py 2>/dev/null || true
 echo "🚀 Starting backend server in background..."
 echo "=========================================="
 
-nohup python backend.py > backend.log 2>&1 &
+nohup python backend.py > ../backend.log 2>&1 &
 BACKEND_PID=$!
 
 echo "✅ Backend server started (PID: $BACKEND_PID)"
-echo "� Logs are being written to backend.log"
+echo "� Logs are being written to ../backend.log"
 echo "🌐 Server should be available at http://localhost:8003"
 echo ""
 echo "To stop the server, run: kill $BACKEND_PID"
