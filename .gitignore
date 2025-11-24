@@ -20,7 +20,6 @@ wheels/
 *.index
 *.json
 
-data/
 output/
 
 retriever/faiss_cache_new/*
