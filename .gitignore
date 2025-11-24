@@ -18,7 +18,6 @@ wheels/
 *.pkl
 *.npy
 *.index
-*.json
 
 output/
 
