@@ -25,8 +25,36 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import uvicorn
 
-from utils.logger import logger
+from utils.logger import logger, setup_logger
 import ast
+import logging
+
+# Configure logging levels for different components
+# Set root logger to WARNING to reduce noise from libraries
+logging.getLogger().setLevel(logging.WARNING)
+
+# Set our application logger to DEBUG for detailed output
+logger.setLevel(logging.DEBUG)
+
+# Configure specific component loggers
+logging.getLogger("models.constructor").setLevel(logging.DEBUG)
+logging.getLogger("models.retriever").setLevel(logging.DEBUG)
+logging.getLogger("utils").setLevel(logging.DEBUG)
+
+# Reduce noise from third-party libraries
+logging.getLogger("uvicorn").setLevel(logging.INFO)
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+logging.getLogger("fastapi").setLevel(logging.INFO)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
+# Log the logging configuration
+log_level_name = logging.getLevelName(logger.level)
+logger.info(f"🔧 Logging initialized: Level={log_level_name}")
+if logger.level == logging.DEBUG:
+    logger.info("🐛 Debug logging ENABLED for application components")
+else:
+    logger.info(f"ℹ️  Standard logging enabled. Set DEBUG=1 or LOG_LEVEL=DEBUG for detailed logs")
 
 # Import document parser
 try:
@@ -664,26 +692,42 @@ def convert_standard_format(graph_data: Dict) -> Dict:
 async def ask_question(request: QuestionRequest, client_id: str = "default"):
     """Process question using agent mode (iterative retrieval + reasoning) and return answer."""
     try:
+        logger.info(f"=== Starting question answering process ===")
+        logger.info(f"Client ID: {client_id}")
+        
         if not GRAPHRAG_AVAILABLE:
+            logger.error("GraphRAG components not available")
             raise HTTPException(status_code=503, detail="GraphRAG components not available. Please install or configure them.")
+        
         dataset_name = request.dataset_name
         question = request.question
+        logger.info(f"Dataset: {dataset_name}")
+        logger.info(f"Question: {question}")
 
         await send_progress_update(client_id, "retrieval", 10, "Initializing retrieval system (agent mode)...")
 
         graph_path = f"output/graphs/{dataset_name}_new.json"
         schema_path = get_schema_path_for_dataset(dataset_name)
+        logger.info(f"Graph path: {graph_path}")
+        logger.info(f"Schema path: {schema_path}")
+        
         if not os.path.exists(graph_path):
+            logger.warning(f"Graph not found at {graph_path}, falling back to demo")
             graph_path = "output/graphs/demo_new.json"
         if not os.path.exists(graph_path):
+            logger.error(f"Graph not found at {graph_path}")
             raise HTTPException(status_code=404, detail="Graph not found. Please construct graph first.")
 
         # Config & components
         global config
         if config is None:
+            logger.info("Loading configuration from config/base_config.yaml")
             config = get_config("config/base_config.yaml")
 
+        logger.info("Initializing GraphQ decomposer")
         graphq = decomposer.GraphQ(dataset_name, config=config)
+        
+        logger.info("Initializing KTRetriever in agent mode")
         kt_retriever = retriever.KTRetriever(
             dataset_name,
             graph_path,
@@ -693,13 +737,17 @@ async def ask_question(request: QuestionRequest, client_id: str = "default"):
             mode="agent",  # force agent mode
             config=config
         )
+        logger.info(f"KTRetriever initialized with top_k={config.retrieval.top_k_filter}, recall_paths={config.retrieval.recall_paths}")
 
         await send_progress_update(client_id, "retrieval", 40, "Building indices...")
+        logger.info("Building retrieval indices...")
         loop = asyncio.get_running_loop()
         # Offload index building to thread executor to avoid blocking event loop
         await loop.run_in_executor(None, kt_retriever.build_indices)
+        logger.info("Indices built successfully")
 
         # Notify QA start via WS so frontend can show immediate progress
+        logger.info("Sending QA start notification via WebSocket")
         try:
             await manager.send_message({
                 "type": "qa_update",
@@ -710,6 +758,7 @@ async def ask_question(request: QuestionRequest, client_id: str = "default"):
                 "timestamp": datetime.now().isoformat()
             }, client_id)
             await asyncio.sleep(0)
+            logger.debug("QA start notification sent successfully")
         except Exception as _e:
             logger.debug(f"QA start ws send failed: {_e}")
 
@@ -721,12 +770,18 @@ async def ask_question(request: QuestionRequest, client_id: str = "default"):
 
         # Step 1: decomposition
         await send_progress_update(client_id, "retrieval", 50, "Decomposing question...")
+        logger.info("=== Step 1: Question Decomposition ===")
         try:
             # Offload decomposition to executor
             loop = asyncio.get_running_loop()
+            logger.info(f"Decomposing question: {question}")
             decomposition = await loop.run_in_executor(None, lambda: graphq.decompose(question, schema_path))
             sub_questions = decomposition.get("sub_questions", [])
             involved_types = decomposition.get("involved_types", {})
+            logger.info(f"Decomposition complete: {len(sub_questions)} sub-questions generated")
+            logger.info(f"Involved types - Nodes: {involved_types.get('nodes', [])}, Relations: {involved_types.get('relations', [])}, Attributes: {involved_types.get('attributes', [])}")
+            for idx, sq in enumerate(sub_questions, 1):
+                logger.info(f"  Sub-question {idx}: {sq.get('sub-question', '')}")
             try:
                 await manager.send_message({
                     "type": "qa_update",
@@ -736,6 +791,7 @@ async def ask_question(request: QuestionRequest, client_id: str = "default"):
                     "timestamp": datetime.now().isoformat()
                 }, client_id)
                 await asyncio.sleep(0.05)
+                logger.debug("Decomposition result sent via WebSocket")
             except Exception:
                 pass
         except Exception as e:
@@ -743,6 +799,7 @@ async def ask_question(request: QuestionRequest, client_id: str = "default"):
             sub_questions = [{"sub-question": question}]
             involved_types = {"nodes": [], "relations": [], "attributes": []}
             decomposition = {"sub_questions": sub_questions, "involved_types": involved_types}
+            logger.warning(f"Using original question as single sub-question due to decomposition failure")
 
         reasoning_steps = []
         all_triples = set()
@@ -751,9 +808,11 @@ async def ask_question(request: QuestionRequest, client_id: str = "default"):
 
         # Step 2: initial retrieval for each sub-question
         await send_progress_update(client_id, "retrieval", 65, "Initial retrieval...")
+        logger.info("=== Step 2: Initial Retrieval for Sub-questions ===")
         import time as _time
         for idx, sq in enumerate(sub_questions):
             sq_text = sq.get("sub-question", question)
+            logger.info(f"Processing sub-question {idx + 1}/{len(sub_questions)}: {sq_text}")
             start_t = _time.time()
             # Offload retrieval to thread executor to avoid blocking event loop
             def _run_retrieval():
@@ -766,6 +825,7 @@ async def ask_question(request: QuestionRequest, client_id: str = "default"):
             triples = retrieval_results.get('triples', []) or []
             chunk_ids = retrieval_results.get('chunk_ids', []) or []
             chunk_contents = retrieval_results.get('chunk_contents', []) or []
+            logger.info(f"  Retrieved {len(triples)} triples and {len(chunk_ids)} chunks in {elapsed:.2f}s")
             if isinstance(chunk_contents, dict):
                 for cid, ctext in chunk_contents.items():
                     all_chunk_contents[cid] = ctext
@@ -775,6 +835,7 @@ async def ask_question(request: QuestionRequest, client_id: str = "default"):
                         all_chunk_contents[cid] = chunk_contents[i_c]
             all_triples.update(triples)
             all_chunk_ids.update(chunk_ids)
+            logger.info(f"  Total accumulated: {len(all_triples)} unique triples, {len(all_chunk_ids)} unique chunks")
             reasoning_steps.append({
                 "type": "sub_question",
                 "question": sq_text,
@@ -801,11 +862,13 @@ async def ask_question(request: QuestionRequest, client_id: str = "default"):
                 }, client_id)
                 # yield to event loop to flush WS frames
                 await asyncio.sleep(0)
+                logger.debug(f"  Sub-question {idx + 1} result sent via WebSocket")
             except Exception as _e:
                 logger.debug(f"QA update ws send failed for sub_question {idx+1}: {_e}")
 
         # Step 3: IRCoT iterative refinement
         await send_progress_update(client_id, "retrieval", 75, "Iterative reasoning...")
+        logger.info("=== Step 3: IRCoT Iterative Refinement ===")
         try:
             await manager.send_message({
                 "type": "qa_update",
@@ -814,30 +877,39 @@ async def ask_question(request: QuestionRequest, client_id: str = "default"):
                 "timestamp": datetime.now().isoformat()
             }, client_id)
             await asyncio.sleep(0.05)
+            logger.debug("IRCoT start notification sent via WebSocket")
         except Exception:
             pass
         max_steps = getattr(getattr(config.retrieval, 'agent', object()), 'max_steps', 3)
+        logger.info(f"Max IRCoT steps: {max_steps}")
         current_query = question
         thoughts = []
 
         # Initial answer attempt
+        logger.info("Generating initial answer...")
         initial_triples = _dedup(list(all_triples))
         initial_chunk_ids = list(set(all_chunk_ids))
         initial_chunk_contents = _merge_chunk_contents(initial_chunk_ids, all_chunk_contents)
+        logger.info(f"Context for initial answer: {len(initial_triples)} triples, {len(initial_chunk_contents)} chunks")
         context_initial = "=== Triples ===\n" + "\n".join(initial_triples[:20]) + "\n=== Chunks ===\n" + "\n".join(initial_chunk_contents[:10])
         init_prompt = kt_retriever.generate_prompt(question, context_initial)
         try:
             # Offload LLM call to thread executor
             initial_answer = await loop.run_in_executor(None, lambda: kt_retriever.generate_answer(init_prompt))
+            logger.info(f"Initial answer generated: {initial_answer[:100]}...")
         except Exception as e:
             initial_answer = f"Initial answer failed: {e}"
+            logger.error(f"Initial answer generation failed: {e}")
         thoughts.append(f"Initial: {initial_answer[:200]}")
         final_answer = initial_answer
 
         for step in range(1, max_steps + 1):
+            logger.info(f"--- IRCoT Step {step}/{max_steps} ---")
+            logger.info(f"Current query: {current_query}")
             loop_triples = _dedup(list(all_triples))
             loop_chunk_ids = list(set(all_chunk_ids))
             loop_chunk_contents = _merge_chunk_contents(loop_chunk_ids, all_chunk_contents)
+            logger.info(f"Current context: {len(loop_triples)} triples, {len(loop_chunk_contents)} chunks")
             loop_ctx = "=== Triples ===\n" + "\n".join(loop_triples[:20]) + "\n=== Chunks ===\n" + "\n".join(loop_chunk_contents[:10])
             loop_prompt = f"""
 You are an expert knowledge assistant using iterative retrieval with chain-of-thought reasoning.
@@ -850,10 +922,13 @@ Instructions:
 2. Else propose new query with: The new query is: <query>
 Your reasoning:
 """
+            logger.debug(f"Generating reasoning for step {step}...")
             try:
                 reasoning = await loop.run_in_executor(None, lambda: kt_retriever.generate_answer(loop_prompt))
+                logger.info(f"Reasoning generated: {reasoning[:150]}...")
             except Exception as e:
                 reasoning = f"Reasoning error: {e}"
+                logger.error(f"Reasoning generation failed at step {step}: {e}")
             thoughts.append(reasoning[:400])
             reasoning_steps.append({
                 "type": "ircot_step",
@@ -879,21 +954,28 @@ Your reasoning:
                 }, client_id)
                 # yield to event loop to flush WS frames
                 await asyncio.sleep(0)
+                logger.debug(f"IRCoT step {step} result sent via WebSocket")
             except Exception as _e:
                 logger.debug(f"QA update ws send failed for ircot step {step}: {_e}")
             if "So the answer is:" in reasoning:
+                logger.info(f"Found final answer at step {step}")
                 m = re.search(r"So the answer is:\s*(.*)", reasoning, flags=re.IGNORECASE | re.DOTALL)
                 final_answer = m.group(1).strip() if m else reasoning
+                logger.info(f"Final answer: {final_answer[:100]}...")
                 break
             if "The new query is:" not in reasoning:
+                logger.warning(f"No new query found at step {step}, using initial answer")
                 final_answer = initial_answer or reasoning
                 break
             new_query = reasoning.split("The new query is:", 1)[1].strip().splitlines()[0]
+            logger.info(f"New query extracted: {new_query}")
             if not new_query or new_query == current_query:
+                logger.warning(f"New query is empty or unchanged, stopping iteration")
                 final_answer = initial_answer or reasoning
                 break
             current_query = new_query
             await send_progress_update(client_id, "retrieval", min(90, 75 + step * 5), f"Iterative retrieval step {step}...")
+            logger.info(f"Performing additional retrieval for new query...")
             try:
                 def _run_more_retrieval():
                     return kt_retriever.process_retrieval_results(current_query, top_k=config.retrieval.top_k_filter)
@@ -901,6 +983,7 @@ Your reasoning:
                 new_triples = new_ret.get('triples', []) or []
                 new_chunk_ids = new_ret.get('chunk_ids', []) or []
                 new_chunk_contents = new_ret.get('chunk_contents', []) or []
+                logger.info(f"Additional retrieval: {len(new_triples)} new triples, {len(new_chunk_ids)} new chunks")
                 if isinstance(new_chunk_contents, dict):
                     for cid, ctext in new_chunk_contents.items():
                         all_chunk_contents[cid] = ctext
@@ -910,18 +993,23 @@ Your reasoning:
                             all_chunk_contents[cid] = new_chunk_contents[i_c]
                 all_triples.update(new_triples)
                 all_chunk_ids.update(new_chunk_ids)
+                logger.info(f"Total accumulated after step {step}: {len(all_triples)} triples, {len(all_chunk_ids)} chunks")
             except Exception as e:
-                logger.error(f"Iterative retrieval failed: {e}")
+                logger.error(f"Iterative retrieval failed at step {step}: {e}")
                 break
 
         # Final aggregation
+        logger.info("=== Final Aggregation ===")
         final_triples = _dedup(list(all_triples))[:20]
         final_chunk_ids = list(set(all_chunk_ids))
         final_chunk_contents = _merge_chunk_contents(final_chunk_ids, all_chunk_contents)[:10]
+        logger.info(f"Final results: {len(final_triples)} triples, {len(final_chunk_contents)} chunks")
+        logger.info(f"Final answer: {final_answer[:200]}...")
 
         await send_progress_update(client_id, "retrieval", 100, "Answer generation completed!")
 
         # Notify frontend that QA process is complete with a compact summary
+        logger.info("Sending completion notification via WebSocket")
         try:
             await manager.send_message({
                 "type": "qa_complete",
@@ -931,9 +1019,11 @@ Your reasoning:
                 "chunks_final_count": len(final_chunk_contents),
                 "timestamp": datetime.now().isoformat()
             }, client_id)
+            logger.debug("QA completion notification sent successfully")
         except Exception as _e:
             logger.debug(f"QA complete ws send failed: {_e}")
 
+        logger.info("Preparing visualization data...")
         visualization_data = {
             "subqueries": prepare_subquery_visualization(sub_questions, reasoning_steps),
             "knowledge_graph": prepare_retrieved_graph_visualization(final_triples),
@@ -945,7 +1035,9 @@ Your reasoning:
                 "triples_by_subquery": [s.get("triples_count", 0) for s in reasoning_steps if s.get("type") == "sub_question"]
             }
         }
+        logger.info("Visualization data prepared")
 
+        logger.info("=== Question answering process completed successfully ===")
         return QuestionResponse(
             answer=final_answer,
             sub_questions=sub_questions,
@@ -955,6 +1047,7 @@ Your reasoning:
             visualization_data=visualization_data
         )
     except Exception as e:
+        logger.error(f"Question answering failed with exception: {str(e)}", exc_info=True)
         await send_progress_update(client_id, "retrieval", 0, f"Question answering failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -1274,12 +1367,41 @@ async def get_graph_data(dataset_name: str):
 @app.on_event("startup")
 async def startup_event():
     """Initialize on startup"""
-    os.makedirs("data/uploaded", exist_ok=True)
-    os.makedirs("output/graphs", exist_ok=True)
-    os.makedirs("output/logs", exist_ok=True)
-    os.makedirs("schemas", exist_ok=True)
+    logger.info("=" * 60)
+    logger.info("🚀 Youtu-GraphRAG Unified Interface starting...")
+    logger.info("=" * 60)
     
-    logger.info("🚀 Youtu-GraphRAG Unified Interface initialized")
+    # Create necessary directories
+    dirs = [
+        "data/uploaded",
+        "output/graphs", 
+        "output/logs",
+        "output/chunks",
+        "schemas",
+        "retriever/faiss_cache_new"
+    ]
+    
+    for dir_path in dirs:
+        os.makedirs(dir_path, exist_ok=True)
+        logger.debug(f"Ensured directory exists: {dir_path}")
+    
+    # Log configuration
+    logger.info(f"GraphRAG components available: {GRAPHRAG_AVAILABLE}")
+    logger.info(f"Document parser available: {DOCUMENT_PARSER_AVAILABLE}")
+    logger.info(f"Logging level: {logger.level} ({logging.getLevelName(logger.level)})")
+    
+    # Log environment info
+    import platform
+    logger.debug(f"Platform: {platform.system()} {platform.release()}")
+    logger.debug(f"Python version: {platform.python_version()}")
+    logger.debug(f"Working directory: {os.getcwd()}")
+    
+    if config:
+        logger.debug(f"Config loaded: {config}")
+    
+    logger.info("=" * 60)
+    logger.info("✅ Youtu-GraphRAG Unified Interface initialized successfully")
+    logger.info("=" * 60)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8003)

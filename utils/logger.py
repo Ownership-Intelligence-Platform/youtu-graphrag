@@ -1,5 +1,6 @@
 import logging
 import sys
+import os
 from datetime import datetime
 from typing import Optional
 
@@ -25,19 +26,24 @@ class ColoredFormatter(logging.Formatter):
         return formatted
 
 def setup_logger(name: str = "youtu-graphrag", 
-                level: int = logging.INFO,
+                level: int = None,
                 log_file: Optional[str] = None) -> logging.Logger:
     """
     Setup and return a logger instance with colored output
     
     Args:
         name: Logger name
-        level: Logging level (default: INFO)
+        level: Logging level (default: INFO, or from LOG_LEVEL env var)
         log_file: Optional file path to save logs
         
     Returns:
         logging.Logger: Configured logger instance
     """
+    # Determine log level from environment variable or default
+    if level is None:
+        log_level_name = os.getenv('LOG_LEVEL', 'INFO').upper()
+        level = getattr(logging, log_level_name, logging.INFO)
+    
     logger = logging.getLogger(name)
     logger.setLevel(level)
     
@@ -54,7 +60,7 @@ def setup_logger(name: str = "youtu-graphrag",
     
     # Format: [Time] LevelName Module:Line - Message
     formatter = ColoredFormatter(
-        fmt='[%(asctime)s] %(levelname)-8s %(module)s:%(lineno)d - %(message)s',
+        fmt='[%(asctime)s] %(levelname)-8s %(name)s:%(module)s:%(lineno)d - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     console_handler.setFormatter(formatter)
@@ -66,7 +72,7 @@ def setup_logger(name: str = "youtu-graphrag",
         file_handler.setLevel(level)
         # File handler without colors
         file_formatter = logging.Formatter(
-            fmt='[%(asctime)s] %(levelname)-8s %(module)s:%(lineno)d - %(message)s',
+            fmt='[%(asctime)s] %(levelname)-8s %(name)s:%(module)s:%(lineno)d - %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
         )
         file_handler.setFormatter(file_formatter)
@@ -75,7 +81,9 @@ def setup_logger(name: str = "youtu-graphrag",
     return logger
 
 # Create default logger instance
-logger = setup_logger()
+# Check if DEBUG mode is enabled via environment variable
+_default_level = logging.DEBUG if os.getenv('DEBUG', '').lower() in ('1', 'true', 'yes') else logging.INFO
+logger = setup_logger(level=_default_level)
 
 def progress(stage: str, message: str, *, done: bool | None = None):
     """Unified progress logging helper.

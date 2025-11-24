@@ -18,7 +18,28 @@ fi
 
 # Kill any existing backend processes
 echo "🔄 Checking for existing processes..."
-pkill -f backend.py 2>/dev/null || true
+EXISTING_PIDS=$(pgrep -f "python.*backend.py" 2>/dev/null || true)
+
+if [ -n "$EXISTING_PIDS" ]; then
+    echo "📍 Found existing backend process(es): $EXISTING_PIDS"
+    echo "🛑 Stopping existing processes..."
+    pkill -9 -f "python.*backend.py" 2>/dev/null || true
+    
+    # Wait a moment and verify processes are killed
+    sleep 2
+    REMAINING_PIDS=$(pgrep -f "python.*backend.py" 2>/dev/null || true)
+    
+    if [ -n "$REMAINING_PIDS" ]; then
+        echo "⚠️  Warning: Some processes may still be running: $REMAINING_PIDS"
+        echo "   Attempting force kill..."
+        kill -9 $REMAINING_PIDS 2>/dev/null || true
+        sleep 1
+    fi
+    
+    echo "✅ Previous processes stopped successfully"
+else
+    echo "✅ No existing processes found"
+fi
 
 # Start the backend server
 echo "🚀 Starting backend server in background..."
