@@ -1,0 +1,220 @@
+{
+    "answer": "姓张的亲戚（张伟）拥有的产业包括：\n\n1. **上海星辰云计算技术有限公司**：张伟是该公司法定代表人、执行董事兼总经理，持股60%（认缴出资额3000万元），公司注册资本5000万元，成立于2015年，登记状态为存续。\n2. **杭州数据技术中心**：由上海星辰云计算技术有限公司对外投资持股15%，因此张伟通过其控股的上海星辰云计算技术有限公司间接持有该中心的权益。\n\n此外，张伟的配偶李芳担任“速运物流（上海）有限公司”的法定代表人，但该公司未显示与张伟有直接股权关联。张伟还曾涉及一起软件著作权侵权案及2023年3月已履行完毕的买卖合同纠纷案件。",
+    "sub_questions": [
+        {
+            "sub-question": "Who are the relatives of people with the surname Zhang?"
+        },
+        {
+            "sub-question": "What industries or businesses are associated with these relatives?"
+        }
+    ],
+    "retrieved_triples": [
+        "(李芳 [schema_type: person], has_attribute, role:监事 ) [score: 0.409]",
+        "(深圳市某电子公司 [schema_type: entity], member_of, Shanghai-Tech-Incidents 上海星辰云计算技术有限公司关联软件著作权侵权案及相关企业与个人。 [members: 上海星辰云计算技术有限公司, 张伟, 李芳, 软件著作权侵权案, 速运物流（上海）有限公司, 杭州数据技术中心, 深圳市某电子公司]) [score: 0.261]",
+        "(李芳 [schema_type: person], related_to, 张伟 [schema_type: person]) [score: 0.539]",
+        "(李芳 [schema_type: person], has_attribute, position:法定代表人 ) [score: 0.439]",
+        "(李芳 [schema_type: person], has_attribute, company:速运物流（上海）有限公司 ) [score: 0.290]",
+        "(上海星辰云计算技术有限公司 [schema_type: organization], has_attribute, historical_risk:买卖合同纠纷, 原告:深圳市某电子公司, 执行标的:45万元, 状态:已履行, date:2023-03 ) [score: 0.248]",
+        "(李芳 , keyword_of, Shanghai-Tech-Incidents 上海星辰云计算技术有限公司关联软件著作权侵权案及相关企业与个人。 [members: 上海星辰云计算技术有限公司, 张伟, 李芳, 软件著作权侵权案, 速运物流（上海）有限公司, 杭州数据技术中心, 深圳市某电子公司]) [score: 0.409]",
+        "(IT高管薪酬数据 [schema_type: concept], related_to, 高级管理（总经理/CEO级） [schema_type: position]) [score: 0.446]",
+        "(张伟 [schema_type: person], related_to, 副局长（正处级） [schema_type: position]) [score: 0.305]",
+        "(李芳 [schema_type: person], has_role, 监事 ) [score: 0.407]",
+        "(李芳 [schema_type: person], has_attribute, relation:配偶 of 张伟 ) [score: 0.469]",
+        "(李芳 [schema_type: person], employment, 上海星辰云计算技术有限公司 [schema_type: organization]) [score: 0.250]",
+        "(杭州数据技术中心 [schema_type: organization], has_attribute, name:杭州数据技术中心 ) [score: 0.439]",
+        "(IT高管薪酬数据 [schema_type: concept], related_to, 高级管理（总经理/CEO级） [schema_type: position]) [score: 0.307]",
+        "(李芳 [schema_type: person], member_of, Shanghai-Tech-Incidents 上海星辰云计算技术有限公司关联软件著作权侵权案及相关企业与个人。 [members: 上海星辰云计算技术有限公司, 张伟, 李芳, 软件著作权侵权案, 速运物流（上海）有限公司, 杭州数据技术中心, 深圳市某电子公司]) [score: 0.434]",
+        "(深圳市某电子公司 [schema_type: entity], has_attribute, involved_in:买卖合同纠纷 ) [score: 0.254]",
+        "(杭州数据技术中心 [schema_type: organization], has_attribute, owner:上海星辰云计算技术有限公司 ) [score: 0.255]",
+        "(李芳 [schema_type: person], related_to, 张伟 [schema_type: person]) [score: 0.278]",
+        "(李芳 [schema_type: person], is_a, person ) [score: 0.428]",
+        "(李芳 [schema_type: person], legal_representative, 速运物流（上海）有限公司 [schema_type: organization]) [score: 0.249]"
+    ],
+    "retrieved_chunks": [
+        "{'title': 'Michael Page China 2024中国薪酬指南：IT行业高管', 'text': '来源：https://www.michaelpage.com.cn/salary-guide (专业机构报告) [4]。\\n区域：上海。行业细分：IT/软件服务/云技术。\\n职位级别：CEO/General Manager (中型私营企业，员工人数 300-600人)。\\n基本年薪范围（不含奖金及股权）：RMB 1,600,000 – RMB 3,000,000。注释：根据本指南，该范围适用于已成立超过5年且营收稳定的非上市科技企业高管。'}",
+        "{'title': '天眼查：企业关联方和风险速览报告', 'text': '来源：https://www.tianyancha.com/company/xxxxxxx (中国人民银行官方备案企业征信机构) [2]。\\n公司名：上海星辰云计算技术有限公司。\\n历史风险：2023年03月，涉及买卖合同纠纷（原告：深圳市某电子公司）。执行标的：45万元。状态：已履行。\\n关联实体：李芳（公司监事，张伟配偶），同时担任“速运物流（上海）有限公司”的法定代表人。速运物流（上海）有限公司无重大行政处罚或司法风险。\\n对外投资：上海星辰云计算技术有限公司对外投资了一家名为“杭州数据技术中心”的公司，持股比例 15%。'}",
+        "{'title': '北京市人力资源和社会保障局：2023年工资指导价位', 'text': '来源：https://rsj.beijing.gov.cn/ (政府官网类) [3]。\\n公告主体：北京市东城区住房保障和城市更新局。\\n招聘职位：副局长（正处级）。\\n人员信息：张伟，男，出生日期 1970年11月20日。\\n工作地址：北京市东城区。\\n薪酬信息：根据职务级别和工龄，月工资及津补贴合计约 2.2万元人民币。注释：该信息用于提供一个具有相同姓名的自然人的独立背景信息，以便系统进行去重和身份排除。'}",
+        "{'title': 'LexisNexis/World Check 负面新闻搜索结果', 'text': '搜索关键词：张伟 AND 上海星辰科技 AND 1985-05-15。\\n搜索命中记录 1:\\n标题：<快讯：上海星辰科技及其高管卷入商标侵权案>\\n来源：地方经济周报，2023年4月12日。\\n摘要：报道称，上海星辰云计算技术有限公司因涉嫌侵犯某软件著作权，被起诉至上海市中级人民法院。报道中提及公司执行董事张伟对此案知情并签字确认了相关产品上线。原告律师表示，将追究公司及相关负责人的责任。\\n搜索命中记录 2:\\n标题：<张伟：科技创新与知识产权边界的思考>\\n来源：某行业峰会官方网站，2023年11月。\\n摘要：CEO张伟在峰会上发表演讲，强调了公司在2023年经历的知识产权挑战，并确认了公司已经与对手方达成和解，表示将更注重合规性。'}",
+        "{'title': 'BOSS直聘：2023年上海IT高管薪酬数据', 'text': '来源：https://www.zhipin.com/salary-report/shanghai/it/ (大型平台类) [4]。\\n报告名称：2023年上海IT/互联网高薪职位年度分析。\\n职位：高级管理（总经理/CEO级）。\\n平均月薪：15万-25万元人民币。数据样本：基于平台内近12个月发布和成交的招聘数据。\\n数据风险：大型平台数据可能存在一定偏差，应与其他权威来源交叉验证。本数据支持年收入水平在180万至300万之间的合理性。'}",
+        "{'title': '全国企业信用信息公示系统查询结果 (310101********5533)', 'text': '统一社会信用代码: 91310115MA1HXXXX9C。\\n企业名称: 上海星辰云计算技术有限公司。\\n法定代表人: 张伟。\\n成立日期: 2015年07月20日。\\n注册资本: 人民币5000万元。\\n企业类型: 有限责任公司(自然人投资或控股)。\\n登记状态: 存续。\\n登记机关: 上海市市场监督管理局。\\n股东信息:\\n股东一：张伟，认缴出资额 3000万元，持股比例 60%。\\n股东二：李芳，认缴出资额 1000万元，持股比例 20%。\\n主要人员信息:\\n张伟：执行董事兼总经理。\\n李芳：监事。'}"
+    ],
+    "reasoning_steps": [
+        {
+            "type": "sub_question",
+            "question": "Who are the relatives of people with the surname Zhang?",
+            "triples": [
+                "(李芳 [schema_type: person], related_to, 张伟 [schema_type: person]) [score: 0.539]",
+                "(李芳 [schema_type: person], relation, 配偶 ) [score: 0.518]",
+                "(李芳 [schema_type: person], has_attribute, name:李芳 ) [score: 0.481]",
+                "(李芳 [schema_type: person], has_attribute, name: 李芳 ) [score: 0.481]",
+                "(李芳 [schema_type: person], has_attribute, relation:配偶 of 张伟 ) [score: 0.469]",
+                "(张伟 [schema_type: person], has_attribute, nationality:中国 ) [score: 0.457]",
+                "(软件著作权侵权案 [schema_type: event], has_attribute, related_person:张伟 ) [score: 0.454]",
+                "(IT高管薪酬数据 [schema_type: concept], related_to, 高级管理（总经理/CEO级） [schema_type: position]) [score: 0.446]",
+                "(李芳 [schema_type: person], has_attribute, position:法定代表人 ) [score: 0.439]",
+                "(杭州数据技术中心 [schema_type: organization], has_attribute, name:杭州数据技术中心 ) [score: 0.439]"
+            ],
+            "triples_count": 17,
+            "chunks_count": 5,
+            "processing_time": 0.02926945686340332,
+            "chunk_contents": [
+                "{'title': 'Michael Page China 2024中国薪酬指南：IT行业高管', 'text': '来源：https://www.michaelpage.com.cn/salary-guide (专业机构报告) [4]。\\n区域：上海。行业细分：IT/软件服务/云技术。\\n职位级别：CEO/General Manager (中型私营企业，员工人数 300-600人)。\\n基本年薪范围（不含奖金及股权）：RMB 1,600,000 – RMB 3,000,000。注释：根据本指南，该范围适用于已成立超过5年且营收稳定的非上市科技企业高管。'}",
+                "{'title': '天眼查：企业关联方和风险速览报告', 'text': '来源：https://www.tianyancha.com/company/xxxxxxx (中国人民银行官方备案企业征信机构) [2]。\\n公司名：上海星辰云计算技术有限公司。\\n历史风险：2023年03月，涉及买卖合同纠纷（原告：深圳市某电子公司）。执行标的：45万元。状态：已履行。\\n关联实体：李芳（公司监事，张伟配偶），同时担任“速运物流（上海）有限公司”的法定代表人。速运物流（上海）有限公司无重大行政处罚或司法风险。\\n对外投资：上海星辰云计算技术有限公司对外投资了一家名为“杭州数据技术中心”的公司，持股比例 15%。'}",
+                "{'title': 'LexisNexis/World Check 负面新闻搜索结果', 'text': '搜索关键词：张伟 AND 上海星辰科技 AND 1985-05-15。\\n搜索命中记录 1:\\n标题：<快讯：上海星辰科技及其高管卷入商标侵权案>\\n来源：地方经济周报，2023年4月12日。\\n摘要：报道称，上海星辰云计算技术有限公司因涉嫌侵犯某软件著作权，被起诉至上海市中级人民法院。报道中提及公司执行董事张伟对此案知情并签字确认了相关产品上线。原告律师表示，将追究公司及相关负责人的责任。\\n搜索命中记录 2:\\n标题：<张伟：科技创新与知识产权边界的思考>\\n来源：某行业峰会官方网站，2023年11月。\\n摘要：CEO张伟在峰会上发表演讲，强调了公司在2023年经历的知识产权挑战，并确认了公司已经与对手方达成和解，表示将更注重合规性。'}"
+            ]
+        },
+        {
+            "type": "sub_question",
+            "question": "What industries or businesses are associated with these relatives?",
+            "triples": [
+                "(软件著作权侵权案 [schema_type: event], has_attribute, related_entity:上海星辰云计算技术有限公司 ) [score: 0.378]",
+                "(IT高管薪酬数据 [schema_type: concept], related_to, 高级管理（总经理/CEO级） [schema_type: position]) [score: 0.307]",
+                "(张伟 [schema_type: person], related_to, 副局长（正处级） [schema_type: position]) [score: 0.305]",
+                "(李芳 [schema_type: person], owns, 上海星辰云计算技术有限公司 [schema_type: organization]) [score: 0.295]",
+                "(软件著作权侵权案 [schema_type: event], has_attribute, related_person:张伟 ) [score: 0.294]",
+                "(李芳 [schema_type: person], has_attribute, company:速运物流（上海）有限公司 ) [score: 0.290]",
+                "(李芳 [schema_type: person], related_to, 张伟 [schema_type: person]) [score: 0.278]",
+                "(张伟 [schema_type: person], owns, 上海星辰云计算技术有限公司 [schema_type: organization]) [score: 0.273]",
+                "(张伟 [schema_type: person], has_attribute, known_associates:上海星辰云计算技术有限公司 ) [score: 0.269]",
+                "(深圳市某电子公司 [schema_type: entity], member_of, Shanghai-Tech-Incidents 上海星辰云计算技术有限公司关联软件著作权侵权案及相关企业与个人。 [members: 上海星辰云计算技术有限公司, 张伟, 李芳, 软件著作权侵权案, 速运物流（上海）有限公司, 杭州数据技术中心, 深圳市某电子公司]) [score: 0.261]"
+            ],
+            "triples_count": 20,
+            "chunks_count": 5,
+            "processing_time": 0.028316974639892578,
+            "chunk_contents": [
+                "{'title': 'Michael Page China 2024中国薪酬指南：IT行业高管', 'text': '来源：https://www.michaelpage.com.cn/salary-guide (专业机构报告) [4]。\\n区域：上海。行业细分：IT/软件服务/云技术。\\n职位级别：CEO/General Manager (中型私营企业，员工人数 300-600人)。\\n基本年薪范围（不含奖金及股权）：RMB 1,600,000 – RMB 3,000,000。注释：根据本指南，该范围适用于已成立超过5年且营收稳定的非上市科技企业高管。'}",
+                "{'title': '天眼查：企业关联方和风险速览报告', 'text': '来源：https://www.tianyancha.com/company/xxxxxxx (中国人民银行官方备案企业征信机构) [2]。\\n公司名：上海星辰云计算技术有限公司。\\n历史风险：2023年03月，涉及买卖合同纠纷（原告：深圳市某电子公司）。执行标的：45万元。状态：已履行。\\n关联实体：李芳（公司监事，张伟配偶），同时担任“速运物流（上海）有限公司”的法定代表人。速运物流（上海）有限公司无重大行政处罚或司法风险。\\n对外投资：上海星辰云计算技术有限公司对外投资了一家名为“杭州数据技术中心”的公司，持股比例 15%。'}",
+                "{'title': 'LexisNexis/World Check 负面新闻搜索结果', 'text': '搜索关键词：张伟 AND 上海星辰科技 AND 1985-05-15。\\n搜索命中记录 1:\\n标题：<快讯：上海星辰科技及其高管卷入商标侵权案>\\n来源：地方经济周报，2023年4月12日。\\n摘要：报道称，上海星辰云计算技术有限公司因涉嫌侵犯某软件著作权，被起诉至上海市中级人民法院。报道中提及公司执行董事张伟对此案知情并签字确认了相关产品上线。原告律师表示，将追究公司及相关负责人的责任。\\n搜索命中记录 2:\\n标题：<张伟：科技创新与知识产权边界的思考>\\n来源：某行业峰会官方网站，2023年11月。\\n摘要：CEO张伟在峰会上发表演讲，强调了公司在2023年经历的知识产权挑战，并确认了公司已经与对手方达成和解，表示将更注重合规性。'}"
+            ]
+        },
+        {
+            "type": "ircot_step",
+            "question": "姓张的亲戚有什么产业",
+            "triples": [
+                "(李芳 [schema_type: person], has_attribute, role:监事 ) [score: 0.409]",
+                "(深圳市某电子公司 [schema_type: entity], member_of, Shanghai-Tech-Incidents 上海星辰云计算技术有限公司关联软件著作权侵权案及相关企业与个人。 [members: 上海星辰云计算技术有限公司, 张伟, 李芳, 软件著作权侵权案, 速运物流（上海）有限公司, 杭州数据技术中心, 深圳市某电子公司]) [score: 0.261]",
+                "(李芳 [schema_type: person], related_to, 张伟 [schema_type: person]) [score: 0.539]",
+                "(李芳 [schema_type: person], has_attribute, position:法定代表人 ) [score: 0.439]",
+                "(李芳 [schema_type: person], has_attribute, company:速运物流（上海）有限公司 ) [score: 0.290]",
+                "(上海星辰云计算技术有限公司 [schema_type: organization], has_attribute, historical_risk:买卖合同纠纷, 原告:深圳市某电子公司, 执行标的:45万元, 状态:已履行, date:2023-03 ) [score: 0.248]",
+                "(李芳 , keyword_of, Shanghai-Tech-Incidents 上海星辰云计算技术有限公司关联软件著作权侵权案及相关企业与个人。 [members: 上海星辰云计算技术有限公司, 张伟, 李芳, 软件著作权侵权案, 速运物流（上海）有限公司, 杭州数据技术中心, 深圳市某电子公司]) [score: 0.409]",
+                "(IT高管薪酬数据 [schema_type: concept], related_to, 高级管理（总经理/CEO级） [schema_type: position]) [score: 0.446]",
+                "(张伟 [schema_type: person], related_to, 副局长（正处级） [schema_type: position]) [score: 0.305]",
+                "(李芳 [schema_type: person], has_role, 监事 ) [score: 0.407]"
+            ],
+            "triples_count": 37,
+            "chunks_count": 6,
+            "processing_time": 0,
+            "chunk_contents": [
+                "{'title': 'Michael Page China 2024中国薪酬指南：IT行业高管', 'text': '来源：https://www.michaelpage.com.cn/salary-guide (专业机构报告) [4]。\\n区域：上海。行业细分：IT/软件服务/云技术。\\n职位级别：CEO/General Manager (中型私营企业，员工人数 300-600人)。\\n基本年薪范围（不含奖金及股权）：RMB 1,600,000 – RMB 3,000,000。注释：根据本指南，该范围适用于已成立超过5年且营收稳定的非上市科技企业高管。'}",
+                "{'title': '天眼查：企业关联方和风险速览报告', 'text': '来源：https://www.tianyancha.com/company/xxxxxxx (中国人民银行官方备案企业征信机构) [2]。\\n公司名：上海星辰云计算技术有限公司。\\n历史风险：2023年03月，涉及买卖合同纠纷（原告：深圳市某电子公司）。执行标的：45万元。状态：已履行。\\n关联实体：李芳（公司监事，张伟配偶），同时担任“速运物流（上海）有限公司”的法定代表人。速运物流（上海）有限公司无重大行政处罚或司法风险。\\n对外投资：上海星辰云计算技术有限公司对外投资了一家名为“杭州数据技术中心”的公司，持股比例 15%。'}",
+                "{'title': '北京市人力资源和社会保障局：2023年工资指导价位', 'text': '来源：https://rsj.beijing.gov.cn/ (政府官网类) [3]。\\n公告主体：北京市东城区住房保障和城市更新局。\\n招聘职位：副局长（正处级）。\\n人员信息：张伟，男，出生日期 1970年11月20日。\\n工作地址：北京市东城区。\\n薪酬信息：根据职务级别和工龄，月工资及津补贴合计约 2.2万元人民币。注释：该信息用于提供一个具有相同姓名的自然人的独立背景信息，以便系统进行去重和身份排除。'}"
+            ],
+            "thought": "So the answer is: 姓张的亲戚（张伟）拥有的产业包括：\n\n1. **上海星辰云计算技术有限公司**：张伟是该公司法定代表人、执行董事兼总经理，持股60%（认缴出资额3000万元），公司注册资本5000万元，成立于2015年，登记状态为存续。\n2. **杭州数据技术中心**：由上海星辰云计算技术有限公司对外投资持股15%，因此张伟通过其控股的上海星辰云计算技术有限公司间接持有该中心的权益。\n\n此外，张伟的配偶李芳担任“速运物流（上海）有限公司”的法定代表人，但该公司未显示与张伟有直接股权关联。张伟还曾涉及一起软件著作权侵权案及2023年3月已履行完毕的买卖合同纠纷案件。"
+        }
+    ],
+    "visualization_data": {
+        "subqueries": {
+            "nodes": [
+                {
+                    "id": "original",
+                    "name": "Original Question",
+                    "category": "question",
+                    "symbolSize": 40
+                },
+                {
+                    "id": "sub_0",
+                    "name": "Who are the relative...",
+                    "category": "sub_question",
+                    "symbolSize": 30
+                },
+                {
+                    "id": "sub_1",
+                    "name": "What industries or b...",
+                    "category": "sub_question",
+                    "symbolSize": 30
+                }
+            ],
+            "links": [
+                {
+                    "source": "original",
+                    "target": "sub_0",
+                    "name": "decomposed to"
+                },
+                {
+                    "source": "original",
+                    "target": "sub_1",
+                    "name": "decomposed to"
+                }
+            ],
+            "categories": [
+                {
+                    "name": "question",
+                    "itemStyle": {
+                        "color": "#ff6b6b"
+                    }
+                },
+                {
+                    "name": "sub_question",
+                    "itemStyle": {
+                        "color": "#4ecdc4"
+                    }
+                }
+            ]
+        },
+        "knowledge_graph": {
+            "nodes": [],
+            "links": [],
+            "categories": [
+                {
+                    "name": "entity",
+                    "itemStyle": {
+                        "color": "#95de64"
+                    }
+                }
+            ]
+        },
+        "reasoning_flow": {
+            "steps": [
+                {
+                    "step": 1,
+                    "type": "sub_question",
+                    "question": "Who are the relatives of people with the surname Z",
+                    "triples_count": 17,
+                    "chunks_count": 5,
+                    "processing_time": 0.02926945686340332
+                },
+                {
+                    "step": 2,
+                    "type": "sub_question",
+                    "question": "What industries or businesses are associated with ",
+                    "triples_count": 20,
+                    "chunks_count": 5,
+                    "processing_time": 0.028316974639892578
+                },
+                {
+                    "step": 3,
+                    "type": "ircot_step",
+                    "question": "姓张的亲戚有什么产业",
+                    "triples_count": 37,
+                    "chunks_count": 6,
+                    "processing_time": 0
+                }
+            ],
+            "timeline": [
+                0.02926945686340332,
+                0.028316974639892578,
+                0
+            ]
+        },
+        "retrieval_details": {
+            "total_triples": 20,
+            "total_chunks": 6,
+            "sub_questions_count": 2,
+            "triples_by_subquery": [
+                17,
+                20
+            ]
+        }
+    }
+}

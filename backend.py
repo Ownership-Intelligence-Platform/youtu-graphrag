@@ -1052,6 +1052,80 @@ Your reasoning:
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/v1/chat/completions")
+async def v1_chat_completions(request_body: dict):
+    """
+    OpenAI-compatible /v1/chat/completions that forwards the question to the
+    internal `ask_question` coroutine and returns an OpenAI-shaped response.
+
+    Expected input:
+      - model: (optional) model name
+      - messages: OpenAI chat messages list (we take the last user message as question)
+      - or question / prompt directly
+      - optional dataset_name and client_id to pass through
+
+    No token required.
+    """
+    try:
+        model = request_body.get("model")
+        messages = request_body.get("messages")
+        question = ""
+        if isinstance(messages, list) and messages:
+            for m in reversed(messages):
+                if isinstance(m, dict) and m.get("content"):
+                    question = m.get("content")
+                    break
+        else:
+            question = request_body.get("question") or request_body.get("prompt") or ""
+
+        dataset_name = request_body.get("dataset_name", "demo")
+        client_id = request_body.get("client_id", "openai")
+
+        # Build QuestionRequest and call internal ask_question
+        qreq = QuestionRequest(question=question, dataset_name=dataset_name)
+        # call the internal coroutine - this runs the real QA pipeline
+        qa_result = await ask_question(qreq, client_id=client_id)
+
+        # qa_result is a QuestionResponse Pydantic model or a dict-like
+        answer_text = getattr(qa_result, "answer", None)
+        if answer_text is None:
+            # If it's a dict, try to get field
+            try:
+                answer_text = qa_result.get("answer")
+            except Exception:
+                answer_text = str(qa_result)
+
+        import uuid, time
+
+        response = {
+            "id": f"chatcmpl-{uuid.uuid4().hex}",
+            "object": "chat.completion",
+            "created": int(time.time()),
+            "model": model or "local-model",
+            "choices": [
+                {
+                    "index": 0,
+                    "message": {"role": "assistant", "content": answer_text},
+                    "finish_reason": "stop"
+                }
+            ],
+            "usage": {
+                "prompt_tokens": 0,
+                "completion_tokens": len(str(answer_text).split()),
+                "total_tokens": len(str(answer_text).split())
+            },
+            "qa": qa_result.dict() if hasattr(qa_result, "dict") else qa_result
+        }
+
+        return response
+    except HTTPException:
+        # re-raise HTTPExceptions from ask_question
+        raise
+    except Exception as e:
+        logger.error(f"Error in /v1/chat/completions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 def prepare_subquery_visualization(sub_questions: List[Dict], reasoning_steps: List[Dict]) -> Dict:
     """Prepare subquery visualization"""
     nodes = [{"id": "original", "name": "Original Question", "category": "question", "symbolSize": 40}]
