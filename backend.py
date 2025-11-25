@@ -13,6 +13,10 @@ import glob
 import shutil
 from typing import List, Dict, Optional
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -28,6 +32,14 @@ import uvicorn
 from utils.logger import logger, setup_logger
 import ast
 import logging
+
+# Neo4j loader (imported here so it's optional - only fails if NEO4J_ENABLED=true and neo4j package missing)
+try:
+    from utils.neo4j_loader import load_graph_to_neo4j
+    NEO4J_LOADER_AVAILABLE = True
+except ImportError as e:
+    NEO4J_LOADER_AVAILABLE = False
+    logger.warning(f"Neo4j loader not available (install neo4j package if needed): {e}")
 
 # Configure logging levels for different components
 # Set root logger to WARNING to reduce noise from libraries
@@ -222,6 +234,52 @@ def decode_bytes_with_detection(data: bytes) -> str:
             continue
     # Last resort
     return data.decode("utf-8", errors="replace")
+
+async def load_graph_to_neo4j_if_enabled(graph_path: str, dataset_name: str):
+    """Load graph into Neo4j if NEO4J_ENABLED=true in .env"""
+    neo4j_enabled = os.getenv("NEO4J_ENABLED", "false").lower() == "true"
+    
+    if not neo4j_enabled:
+        logger.debug("Neo4j loading disabled (NEO4J_ENABLED=false)")
+        return None
+    
+    if not NEO4J_LOADER_AVAILABLE:
+        logger.warning("⚠️  NEO4J_ENABLED=true but neo4j package not installed. Run: pip install neo4j")
+        return None
+    
+    # Get Neo4j config from environment
+    neo4j_uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+    neo4j_user = os.getenv("NEO4J_USER", "neo4j")
+    neo4j_password = os.getenv("NEO4J_PASSWORD", "password")
+    neo4j_database = os.getenv("NEO4J_DATABASE", "neo4j")
+    
+    logger.info(f"📊 Loading graph into Neo4j: {neo4j_uri}, database: {neo4j_database}")
+    
+    try:
+        # Run in executor to avoid blocking event loop
+        loop = asyncio.get_event_loop()
+        stats = await loop.run_in_executor(
+            None,
+            load_graph_to_neo4j,
+            graph_path,
+            dataset_name,
+            neo4j_uri,
+            neo4j_user,
+            neo4j_password,
+            neo4j_database,
+            True  # clear_existing
+        )
+        
+        if stats:
+            logger.info(f"✅ Neo4j load successful: {stats}")
+            return stats
+        else:
+            logger.error("❌ Neo4j load failed (check connection and credentials)")
+            return None
+    except Exception as e:
+        logger.error(f"❌ Error loading graph to Neo4j: {e}", exc_info=True)
+        return None
+
 
 async def clear_cache_files(dataset_name: str):
     """Clear all cache files for a dataset before graph construction"""
@@ -505,14 +563,21 @@ async def construct_graph(request: GraphConstructionRequest, client_id: str = "d
         graph_vis_data = await prepare_graph_visualization(graph_path)
         
         await send_progress_update(client_id, "construction", 100, "Graph construction completed!")
+        
+        # Load into Neo4j if enabled
+        neo4j_stats = await load_graph_to_neo4j_if_enabled(graph_path, dataset_name)
+        
         # Notify completion via WebSocket
         try:
-            await manager.send_message({
+            completion_message = {
                 "type": "complete",
                 "stage": "construction",
                 "message": "Graph construction completed!",
                 "timestamp": datetime.now().isoformat()
-            }, client_id)
+            }
+            if neo4j_stats:
+                completion_message["neo4j"] = neo4j_stats
+            await manager.send_message(completion_message, client_id)
         except Exception as _e:
             logger.warning(f"Failed to send completion message: {_e}")
         
@@ -1389,14 +1454,22 @@ async def reconstruct_dataset(dataset_name: str, client_id: str = "default"):
         knowledge_graph = await loop.run_in_executor(None, build_graph_sync)
         
         await send_progress_update(client_id, "reconstruction", 100, "Graph reconstruction completed!")
+        
+        # Load into Neo4j if enabled
+        graph_path = f"output/graphs/{dataset_name}_new.json"
+        neo4j_stats = await load_graph_to_neo4j_if_enabled(graph_path, dataset_name)
+        
         # Notify completion via WebSocket
         try:
-            await manager.send_message({
+            completion_message = {
                 "type": "complete",
                 "stage": "reconstruction",
                 "message": "Graph reconstruction completed!",
                 "timestamp": datetime.now().isoformat()
-            }, client_id)
+            }
+            if neo4j_stats:
+                completion_message["neo4j"] = neo4j_stats
+            await manager.send_message(completion_message, client_id)
         except Exception as _e:
             logger.warning(f"Failed to send completion message: {_e}")
         

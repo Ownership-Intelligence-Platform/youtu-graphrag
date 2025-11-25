@@ -41,3 +41,6 @@ nanoid==2.0.0
 dotenv==0.9.9 
 python-dotenv==1.1.1
 chardet==5.2.0
+
+# Graph Database (optional - only needed if NEO4J_ENABLED=true)
+neo4j==5.14.1

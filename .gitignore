@@ -10,7 +10,10 @@ wheels/
 .idea
 .codebuddy/
 retriever/faiss_cache/
-retriever/faiss_cache_new/
+retriever/faiss_cache_new/*.json
+retriever/faiss_cache_new/*.index
+retriever/faiss_cache_new/*.pk1
+retriever/faiss_cache_new/*.pt
 venv/
 .venv
 .env
