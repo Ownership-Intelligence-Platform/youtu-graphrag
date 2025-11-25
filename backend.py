@@ -94,13 +94,14 @@ app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 # Mount frontend directory for frontend assets
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
 
-# CORS middleware
+# CORS middleware - Enable cross-origin requests for external UI applications
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Allows all origins. For production, specify exact origins like ["http://localhost:3000", "http://your-app-domain.com"]
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allows all HTTP methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allows all headers
+    expose_headers=["*"],  # Exposes all response headers to the client
 )
 
 # Global variables
