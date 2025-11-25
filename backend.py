@@ -1084,7 +1084,12 @@ async def v1_chat_completions(request_body: dict):
         # Build QuestionRequest and call internal ask_question
         qreq = QuestionRequest(question=question, dataset_name=dataset_name)
         # call the internal coroutine - this runs the real QA pipeline
-        qa_result = await ask_question(qreq, client_id=client_id)
+        try:
+            qa_result = await ask_question(qreq, client_id=client_id)
+        except Exception as e:
+            # Log full exception on server side (safe), and return a simple 500 to client
+            logger.exception("Internal ask_question failed")
+            raise HTTPException(status_code=500, detail="Internal server error; see server logs")
 
         # qa_result is a QuestionResponse Pydantic model or a dict-like
         answer_text = getattr(qa_result, "answer", None)
