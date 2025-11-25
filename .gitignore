@@ -9,8 +9,9 @@ wheels/
 .vscode
 .idea
 .codebuddy/
-
-
+retriever/faiss_cache/
+retriever/faiss_cache_new/
+venv/
 .venv
 .env
 
